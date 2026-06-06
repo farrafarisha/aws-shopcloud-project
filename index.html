@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopCloud – AWS E-Commerce Store</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #FF9900;
+      --primary-dark: #e68a00;
+      --dark: #131921;
+      --dark2: #232f3e;
+      --text: #1a1a1a;
+      --muted: #555;
+      --light: #f7f7f7;
+      --white: #ffffff;
+      --success: #2ecc71;
+      --radius: 10px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.10);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      background: var(--dark);
+      position: sticky; top: 0; z-index: 100;
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .nav-logo { color: var(--primary); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--white); }
+    .nav-search {
+      flex: 1; max-width: 480px; margin: 0 2rem;
+      display: flex; background: var(--white); border-radius: 6px; overflow: hidden;
+    }
+    .nav-search input {
+      flex: 1; border: none; outline: none; padding: 0.5rem 1rem;
+      font-size: 0.95rem; background: transparent;
+    }
+    .nav-search button {
+      background: var(--primary); border: none; cursor: pointer;
+      padding: 0 1rem; font-size: 1.1rem; color: var(--white);
+      transition: background 0.2s;
+    }
+    .nav-search button:hover { background: var(--primary-dark); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--white); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .cart-btn {
+      background: var(--primary); color: var(--dark) !important;
+      padding: 0.4rem 1rem; border-radius: 6px; font-weight: 700 !important;
+      font-size: 0.9rem !important;
+    }
+    .cart-btn:hover { background: var(--primary-dark) !important; color: var(--white) !important; }
+
+    /* ===== HERO BANNER ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--dark2) 0%, #1a2a3a 60%, #0d1b2a 100%);
+      color: var(--white); padding: 5rem 2rem;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(255,153,0,0.15) 0%, transparent 70%);
+    }
+    .hero-content { position: relative; max-width: 700px; margin: 0 auto; }
+    .hero-badge {
+      display: inline-block; background: var(--primary); color: var(--dark);
+      font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.9rem;
+      border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.2rem;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+    .hero h1 span { color: var(--primary); }
+    .hero p { font-size: 1.1rem; color: #b0bec5; margin-bottom: 2rem; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--primary); color: var(--dark); border: none;
+      padding: 0.85rem 2.2rem; font-size: 1rem; font-weight: 700;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-block;
+    }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,153,0,0.4); }
+    .btn-outline {
+      background: transparent; color: var(--white);
+      border: 2px solid rgba(255,255,255,0.4);
+      padding: 0.85rem 2.2rem; font-size: 1rem; font-weight: 600;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s; display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+
+    /* ===== AWS BADGE BAR ===== */
+    .aws-bar {
+      background: var(--dark2); color: #aaa; text-align: center;
+      padding: 0.75rem 2rem; font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;
+    }
+    .aws-bar span { display: flex; align-items: center; gap: 0.4rem; }
+    .aws-bar .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; }
+
+    /* ===== CATEGORIES ===== */
+    .categories { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--dark); }
+    .section-title span { color: var(--primary); }
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
+    .cat-card {
+      background: var(--white); border-radius: var(--radius); padding: 1.5rem 1rem;
+      text-align: center; cursor: pointer; transition: all 0.2s;
+      box-shadow: var(--shadow); border: 2px solid transparent;
+    }
+    .cat-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .cat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .cat-card p { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+
+    /* ===== PRODUCT GRID ===== */
+    .products-section { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .products-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .filter-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .filter-btn {
+      background: var(--white); border: 2px solid #e0e0e0;
+      padding: 0.4rem 1rem; border-radius: 20px; cursor: pointer;
+      font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+    }
+    .filter-btn.active, .filter-btn:hover { border-color: var(--primary); color: var(--primary); background: #fff8ee; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+
+    /* ===== PRODUCT CARD ===== */
+    .product-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s; position: relative;
+    }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+    .badge-new {
+      position: absolute; top: 12px; left: 12px; z-index: 2;
+      background: #e74c3c; color: white; font-size: 0.7rem;
+      font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .badge-sale {
+      position: absolute; top: 12px; left: 12px; z-index: 2;
+      background: var(--primary); color: var(--dark); font-size: 0.7rem;
+      font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 4px; letter-spacing: 0.5px;
+    }
+    .product-img {
+      height: 200px; background: var(--light); display: flex;
+      align-items: center; justify-content: center; font-size: 4rem;
+      position: relative; overflow: hidden;
+    }
+    .wishlist-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: white; border: none; border-radius: 50%;
+      width: 32px; height: 32px; cursor: pointer; font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wishlist-btn:hover { transform: scale(1.2); }
+    .product-info { padding: 1rem; }
+    .product-category { font-size: 0.72rem; color: var(--primary); text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 0.3rem; }
+    .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.35; }
+    .product-rating { display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.6rem; }
+    .stars { color: var(--primary); font-size: 0.85rem; }
+    .rating-count { font-size: 0.78rem; color: var(--muted); }
+    .product-price { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .price-main { font-size: 1.3rem; font-weight: 800; color: var(--dark); }
+    .price-old { font-size: 0.85rem; color: var(--muted); text-decoration: line-through; }
+    .price-save { font-size: 0.75rem; color: var(--success); font-weight: 600; }
+    .add-cart {
+      width: 100%; background: var(--primary); border: none; color: var(--dark);
+      font-weight: 700; font-size: 0.9rem; padding: 0.65rem;
+      border-radius: 7px; cursor: pointer; transition: all 0.2s;
+    }
+    .add-cart:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .add-cart.added { background: var(--success); color: white; }
+
+    /* ===== FEATURES STRIP ===== */
+    .features-strip {
+      background: var(--dark2); color: var(--white);
+      padding: 2rem; margin: 3rem 0;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;
+      text-align: center;
+    }
+    .feature-item .fi-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .feature-item h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .feature-item p { font-size: 0.8rem; color: #aaa; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--dark); color: #bbb;
+      padding: 3rem 2rem 1.5rem;
+    }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+    .footer-col h4 { color: var(--white); font-size: 0.95rem; margin-bottom: 1rem; font-weight: 700; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.5rem; font-size: 0.85rem; cursor: pointer; transition: color 0.2s; }
+    .footer-col ul li:hover { color: var(--primary); }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; border-top: 1px solid #333; padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-bottom p { font-size: 0.82rem; }
+    .aws-powered { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+    .aws-logo { background: var(--primary); color: var(--dark); font-weight: 800; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; }
+
+    /* ===== CART TOAST ===== */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+      background: var(--dark); color: white; padding: 1rem 1.5rem;
+      border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      transform: translateY(100px); opacity: 0; transition: all 0.3s;
+      font-size: 0.9rem; display: flex; align-items: center; gap: 0.7rem;
+      border-left: 4px solid var(--primary);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 14px; max-width: 520px; width: 100%;
+      padding: 2rem; position: relative; animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem; background: var(--light);
+      border: none; border-radius: 50%; width: 32px; height: 32px;
+      cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-img { font-size: 5rem; text-align: center; margin-bottom: 1rem; }
+    .modal-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .modal-price { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
+    .modal-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+    .modal-btn { width: 100%; }
+
+    @media (max-width: 700px) {
+      nav { padding: 0 1rem; }
+      .nav-search { display: none; }
+      .hero { padding: 3rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">Shop<span>Cloud</span></div>
+  <div class="nav-search">
+    <input type="text" placeholder="Search products..."/>
+    <button>🔍</button>
+  </div>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Deals</a>
+    <a href="#" class="cart-btn" onclick="openCart()">🛒 Cart (<span id="cart-count">0</span>)</a>
+  </div>
+</nav>
+
+<!-- AWS STATUS BAR -->
+<div class="aws-bar">
+  <span><span class="dot"></span> EC2 Instance: Running (us-east-1)</span>
+  <span><span class="dot"></span> RDS MySQL: Connected</span>
+  <span><span class="dot"></span> S3 Bucket: Active</span>
+  <span><span class="dot"></span> VPC: Secured</span>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">☁️ Powered by Amazon Web Services</div>
+    <h1>Next-Gen Shopping <span>Powered by AWS</span></h1>
+    <p>Experience lightning-fast, globally available e-commerce — built on EC2, RDS, S3, and VPC for maximum reliability.</p>
+    <div class="hero-btns">
+      <a href="#products" class="btn-primary">🛍️ Shop Now</a>
+      <a href="#aws-info" class="btn-outline">☁️ Our AWS Stack</a>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories">
+  <h2 class="section-title">Shop by <span>Category</span></h2>
+  <div class="cat-grid">
+    <div class="cat-card" onclick="filterProducts('Electronics')"><div class="cat-icon">📱</div><p>Electronics</p></div>
+    <div class="cat-card" onclick="filterProducts('Fashion')"><div class="cat-icon">👗</div><p>Fashion</p></div>
+    <div class="cat-card" onclick="filterProducts('Home')"><div class="cat-icon">🏠</div><p>Home & Garden</p></div>
+    <div class="cat-card" onclick="filterProducts('Books')"><div class="cat-icon">📚</div><p>Books</p></div>
+    <div class="cat-card" onclick="filterProducts('Sports')"><div class="cat-icon">⚽</div><p>Sports</p></div>
+    <div class="cat-card" onclick="filterProducts('All')"><div class="cat-icon">✨</div><p>All Items</p></div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="products">
+  <div class="products-header">
+    <h2 class="section-title">Featured <span>Products</span></h2>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter(this,'All')">All</button>
+      <button class="filter-btn" onclick="setFilter(this,'Electronics')">Electronics</button>
+      <button class="filter-btn" onclick="setFilter(this,'Fashion')">Fashion</button>
+      <button class="filter-btn" onclick="setFilter(this,'Home')">Home</button>
+      <button class="filter-btn" onclick="setFilter(this,'Books')">Books</button>
+      <button class="filter-btn" onclick="setFilter(this,'Sports')">Sports</button>
+    </div>
+  </div>
+  <div class="products-grid" id="products-grid"></div>
+</section>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip" id="aws-info">
+  <div class="feature-item"><div class="fi-icon">⚡</div><h4>EC2 Compute</h4><p>Auto-scaling web server on t2.micro instance</p></div>
+  <div class="feature-item"><div class="fi-icon">🗃️</div><h4>RDS Database</h4><p>MySQL 8.0 managed database for product data</p></div>
+  <div class="feature-item"><div class="fi-icon">🪣</div><h4>S3 Storage</h4><p>Static assets & images stored in S3 bucket</p></div>
+  <div class="feature-item"><div class="fi-icon">🔒</div><h4>VPC Network</h4><p>Private subnet, security groups, internet gateway</p></div>
+  <div class="feature-item"><div class="fi-icon">🚀</div><h4>Fast Delivery</h4><p>Free shipping on orders over RM 50</p></div>
+  <div class="feature-item"><div class="fi-icon">🛡️</div><h4>Secure Checkout</h4><p>SSL encrypted payments via AWS ACM</p></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>ShopCloud</h4>
+      <ul>
+        <li>About Us</li><li>Careers</li><li>Press</li><li>Blog</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <ul>
+        <li>FAQ</li><li>Shipping Info</li><li>Returns</li><li>Contact</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>My Account</h4>
+      <ul>
+        <li>Sign In</li><li>Register</li><li>Order History</li><li>Wishlist</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>AWS Infrastructure</h4>
+      <ul>
+        <li>EC2 (Web Server)</li>
+        <li>RDS MySQL (Database)</li>
+        <li>S3 (Storage)</li>
+        <li>VPC (Networking)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 ShopCloud. Built for AWS Cloud Computing Project.</p>
+    <div class="aws-powered">
+      <div class="aws-logo">AWS</div>
+      <span>Hosted on Amazon Web Services</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CART TOAST -->
+<div class="toast" id="toast">🛒 <span id="toast-msg">Item added to cart!</span></div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-img" id="modal-img"></div>
+    <div class="modal-title" id="modal-name"></div>
+    <div class="modal-price" id="modal-price"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <button class="btn-primary modal-btn" id="modal-add">🛒 Add to Cart</button>
+  </div>
+</div>
+
+<script>
+// ===== PRODUCT DATA (simulates RDS database response) =====
+const products = [
+  { id:1, name:"Wireless Noise-Cancelling Headphones", category:"Electronics", price:189, oldPrice:249, emoji:"🎧", rating:4.8, reviews:1243, badge:"sale", desc:"Premium 40hr battery, active noise cancellation, Bluetooth 5.2. Perfect for work and travel." },
+  { id:2, name:"Mechanical Gaming Keyboard", category:"Electronics", price:129, oldPrice:159, emoji:"⌨️", rating:4.6, reviews:892, badge:"", desc:"RGB backlit, tactile blue switches, USB-C, N-key rollover. Ideal for gamers and typists." },
+  { id:3, name:"Running Shoes Pro X", category:"Sports", price:99, oldPrice:130, emoji:"👟", rating:4.7, reviews:2134, badge:"new", desc:"Lightweight carbon-fiber sole, breathable mesh upper, available in 6 colours. Runs true to size." },
+  { id:4, name:"Casual Linen Shirt", category:"Fashion", price:45, oldPrice:65, emoji:"👔", rating:4.5, reviews:560, badge:"sale", desc:"100% linen, relaxed fit, machine washable. Sizes XS–3XL. Perfect for tropical weather." },
+  { id:5, name:"Python for Beginners", category:"Books", price:35, oldPrice:null, emoji:"📘", rating:4.9, reviews:3201, badge:"new", desc:"Learn Python from scratch with hands-on projects. Covers variables, loops, OOP, APIs and more." },
+  { id:6, name:"Smart LED Desk Lamp", category:"Home", price:59, oldPrice:79, emoji:"💡", rating:4.4, reviews:441, badge:"", desc:"5 colour temperatures, touch dimmer, USB-A charging port, eye-care mode. Foldable design." },
+  { id:7, name:"Fitness Resistance Bands Set", category:"Sports", price:28, oldPrice:39, emoji:"💪", rating:4.6, reviews:987, badge:"sale", desc:"5-level resistance, latex-free, includes carry bag and workout guide. Great for home gym." },
+  { id:8, name:"Minimalist Leather Wallet", category:"Fashion", price:55, oldPrice:null, emoji:"👛", rating:4.7, reviews:312, badge:"new", desc:"Full-grain leather, 6 card slots, RFID blocking, slim profile. Fits all pockets." },
+  { id:9, name:"Portable Bluetooth Speaker", category:"Electronics", price:75, oldPrice:99, emoji:"🔊", rating:4.5, reviews:1678, badge:"", desc:"360° sound, IPX7 waterproof, 20hr battery, USB-C. Perfect companion for outdoors." },
+  { id:10, name:"Ceramic Plant Pot Set", category:"Home", price:38, oldPrice:50, emoji:"🪴", rating:4.8, reviews:223, badge:"new", desc:"Set of 3 handmade ceramic pots with bamboo tray. Suitable for succulents and small plants." },
+  { id:11, name:"Design Thinking Handbook", category:"Books", price:42, oldPrice:null, emoji:"📕", rating:4.6, reviews:788, badge:"", desc:"From IDEO practitioners — covers empathise, define, ideate, prototype, test with real case studies." },
+  { id:12, name:"Yoga Mat Premium", category:"Sports", price:65, oldPrice:89, emoji:"🧘", rating:4.9, reviews:1120, badge:"sale", desc:"6mm thick TPE foam, non-slip texture, alignment lines, carry strap included. 183×61cm." },
+];
+
+let cart = [];
+let currentFilter = 'All';
+let currentModal = null;
+
+function renderProducts(filter) {
+  const grid = document.getElementById('products-grid');
+  const filtered = filter === 'All' ? products : products.filter(p => p.category === filter);
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card">
+      ${p.badge === 'new' ? '<span class="badge-new">NEW</span>' : p.badge === 'sale' ? '<span class="badge-sale">SALE</span>' : ''}
+      <div class="product-img" onclick="openModal(${p.id})">
+        ${p.emoji}
+        <button class="wishlist-btn" onclick="event.stopPropagation(); wishlist(${p.id})">🤍</button>
+      </div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-rating">
+          <span class="stars">${'★'.repeat(Math.floor(p.rating))}${'☆'.repeat(5-Math.floor(p.rating))}</span>
+          <span class="rating-count">(${p.reviews.toLocaleString()})</span>
+        </div>
+        <div class="product-price">
+          <span class="price-main">RM ${p.price}</span>
+          ${p.oldPrice ? `<span class="price-old">RM ${p.oldPrice}</span><span class="price-save">Save RM ${p.oldPrice - p.price}</span>` : ''}
+        </div>
+        <button class="add-cart" onclick="addToCart(${p.id}, this)">🛒 Add to Cart</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setFilter(el, filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = filter;
+  renderProducts(filter);
+}
+
+function filterProducts(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === filter || (filter === 'All' && b.textContent.trim() === 'All'));
+  });
+  renderProducts(filter);
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
+}
+
+function addToCart(id, btn) {
+  const p = products.find(x => x.id === id);
+  cart.push(p);
+  document.getElementById('cart-count').textContent = cart.length;
+  btn.textContent = '✅ Added!';
+  btn.classList.add('added');
+  setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('added'); }, 1800);
+  showToast(`${p.emoji} "${p.name}" added to cart!`);
+}
+
+function openCart() {
+  if (cart.length === 0) { showToast('🛒 Your cart is empty!'); return; }
+  const total = cart.reduce((s, p) => s + p.price, 0);
+  showToast(`🛒 ${cart.length} item(s) — Total: RM ${total}`);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function wishlist(id) {
+  const p = products.find(x => x.id === id);
+  showToast(`❤️ "${p.name}" added to wishlist!`);
+}
+
+function openModal(id) {
+  const p = products.find(x => x.id === id);
+  currentModal = p;
+  document.getElementById('modal-img').textContent = p.emoji;
+  document.getElementById('modal-name').textContent = p.name;
+  document.getElementById('modal-price').textContent = `RM ${p.price}${p.oldPrice ? ' (was RM '+p.oldPrice+')' : ''}`;
+  document.getElementById('modal-desc').textContent = p.desc;
+  document.getElementById('modal-add').onclick = () => { addToCart(p.id, document.getElementById('modal-add')); closeModal(); };
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+// Init
+renderProducts('All');
+</script>
+</body>
+</html>
