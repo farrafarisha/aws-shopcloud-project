@@ -6,8 +6,8 @@
 ## 👥 Team Members
 | Name | Student ID | Role |
 |------|-----------|------|
-| [Member 1 Name] | [ID 1] | EC2 Setup, Website Development, GitHub |
-| [Member 2 Name] | [ID 2] | RDS & S3 Setup, VPC Config, Report & Video |
+| [Nur Farra Farisha Binti Rusdi] | [52222223221] | EC2 Setup, Website Development, GitHub |
+| [Fathin Noorshafirah Binti Ismail Phua] | [52222223203] | RDS & S3 Setup, VPC Config, Report & Video |
 
 ---
 
@@ -17,8 +17,8 @@
 ---
 
 ## 🌐 Live Website
-🔗 **Website URL:** http://[YOUR_EC2_PUBLIC_IP]  
-🔗 **S3 Static URL:** http://shopcloud-assets-[yourname].s3-website-us-east-1.amazonaws.com
+🔗 **Website URL:** http://[http://13.214.210.146]  
+🔗 **S3 Static URL:** http://shopcloud-assets-farrafathin.s3-website-ap-southeast-1.amazonaws.com
 
 ---
 
@@ -104,8 +104,7 @@ aws-shopcloud-project/
 
 1. **Clone this repo**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/aws-shopcloud-project.git
-   cd aws-shopcloud-project
+   git clone https://github.com/farrafarisha/aws-shopcloud-project.git
    ```
 
 2. **Set up AWS (follow the full guide in the report)**
@@ -116,17 +115,17 @@ aws-shopcloud-project/
 
 3. **Run the SQL schema**
    ```bash
-   mysql -h YOUR_RDS_ENDPOINT -u admin -p < sql/shopcloud_schema.sql
+   mysql -h shopcloud-db.czqeioku0x0a.ap-southeast-1.rds.amazonaws.com -u admin -p < sql/shopcloud_schema.sql
    ```
 
 4. **Upload the website to EC2**
    ```bash
-   scp -i shopcloud-key.pem website/index.html ec2-user@YOUR_EC2_IP:/home/ec2-user/
-   ssh -i shopcloud-key.pem ec2-user@YOUR_EC2_IP
+   scp -i shopcloud-key.pem website/index.html ec2-user@13.214.210.146:/home/ec2-user/
+   ssh -i shopcloud-key.pem ec2-user@13.214.210.146
    sudo cp index.html /var/www/html/index.html
    ```
 
-5. **Visit your site** at `http://YOUR_EC2_PUBLIC_IP`
+5. **Visit your site** at `http://13.214.210.146`
 
 ---
 
